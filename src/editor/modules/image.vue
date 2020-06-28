@@ -71,21 +71,27 @@ export default {
                   console.log(data)
                   
                   if(data.error){
-                     this.$toast.show(data.message, 'Error', this.ac.toast_opts.error)
+                     console.error('S3 upload error:',data.message)
                       this.process_running = false
                      this.upload_progress = 0
                      return false
                   }
                   
                   if(data.complete){
-                     console.warn('S3 Upload Complete')
+                     if(Meteor.isDevelopment){
+                        console.warn('S3 Upload Complete',data)
+                     }
+                     
                      this.image = data.Location
                      this.process_running = false
                      this.upload_progress = 0
-                        this.$toast.show('Base64 Image Uploaded to S3', 'Sucess', this.ac.toast_opts.success)
-                     this.$emit("exec", "insertHTML", `<img src=${data.Location}>`);
+                     this.fileUploaded (file, data.Location)
+                     this.$refs.dropzone.removeFile(file)
                   }else{
-                     console.log(data)
+                     if(Meteor.isDevelopment){
+                        console.log('S3 upload progress report: ',data)
+                     }
+                     
                      this.process_running = false
                      this.upload_progress = data.progress
                   }
